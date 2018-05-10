@@ -6,21 +6,29 @@
 
 ![](./preview/s1.png)
 
+## 功能
+
+- Android点升级按钮全自动升级安装apk，IOS点升级按钮进入苹果商店下载
+- 支持多主题(正在开发中...)，及自定义主题
+
 ## 安装
 
+### 安装npm
 ```
-npm install react-native-update-app --save`
+npm install react-native-update-app --save
 ```
 
 ### 自动链接
 
 ```
-react-native link react-native-update-app`
+react-native link react-native-update-app
 ```
+
+成功后，命令行窗口会有 `success` 字样提示。
 
 ### 手动链接
 
-如果自动链接不行，请安装下面步骤进行手动链接。
+如果自动成功，则忽略这一步。如果自动链接不行，请安装下面步骤进行手动链接。
 
 #### iOS
 
