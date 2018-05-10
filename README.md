@@ -1,6 +1,6 @@
 # react-native-update-app
 
-全自动apk硬更新组件，简单易用。
+全自动 apk 硬更新组件，简单易用。
 
 ## 预览
 
@@ -27,35 +27,43 @@
 
 #### Android
 
-1.  Open up `android/app/src/main/java/[...]/MainActivity.java`
+1.  打开 `android/app/src/main/java/[...]/MainActivity.java`
 
-*   Add `import com.reactlibrary.RNUpdateAppPackage;` to the imports at the top of the file
-*   Add `new RNUpdateAppPackage()` to the list returned by the `getPackages()` method
+*   添加 `import com.reactlibrary.RNUpdateAppPackage;`
+*   在 `getPackages()`方法里添加 `new RNUpdateAppPackage()` 
 
-2.  Append the following lines to `android/settings.gradle`:
+2.  在 `android/settings.gradle` 加入:
     ```
     include ':react-native-update-app'
     project(':react-native-update-app').projectDir = new File(rootProject.projectDir, 	'../node_modules/react-native-update-app/android')
     ```
-3.  Insert the following lines inside the dependencies block in `android/app/build.gradle`:
+3.  在 `android/app/build.gradle` 里加入:
     ```
       compile project(':react-native-update-app')
     ```
 
 ## 使用
 
+全自动检查版本进行更新升级，只需引入组件即可。
+
 ```javascript
-import RNUpdateApp from "react-native-update-app"
+import RNUpdate from "react-native-update-app"
 
 // url 表示接口地址，在下面有详细介绍
 render() {
 	return (
 		<View>
-			<RNUpdateApp.Box url={"http://banli17.xxx.com/u.json"} />
+            <RNUpdate
+                url={"http://banli17.xxx.com/u.json"}  // json url
+                progressBarColor: "#f50",
+                updateBoxWidth: 250,     // 升级框的宽度
+                updateBoxHeight: 250,    // 升级框的高度
+                updateBtnHeight: 38,     // 升级按钮的高度
+                banner={require('./imgs/a.png')}  // 换升级弹框图片
+             />
 		</View>
 	)
 }
-
 ```
 
 下面是 u.json 的数据格式：
@@ -63,14 +71,11 @@ render() {
 ```json
 {
     "version": "1.1",
-    "totalSize": "12000000",  
-    "fromUrl": "http://down.4vtk.com/apk/ck-2.0.0.apk",  
-    "fileName": "ck-2.0.0.apk",  
+    "totalSize": "12000000",
+    "fromUrl": "http://down.4vtk.com/apk/ck-2.0.0.apk",
+    "fileName": "ck-2.0.0.apk",
     "iosUrl": "",
-    "desc": [
-        "新增了收藏功能",
-        "优化了整体性能"
-    ]
+    "desc": ["新增了收藏功能", "优化了整体性能"]
 }
 ```
 

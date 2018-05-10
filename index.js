@@ -16,10 +16,18 @@ import {
 const { RNUpdateApp } = NativeModules
 const RNFS = require("react-native-fs")
 const { width, height } = Dimensions.get("window")
-console.log(RNUpdateApp)
 const isIOS = Platform.OS == "ios"
 
-class Box extends Component {
+class RNUpdate extends Component {
+    // 定义默认属性
+    static defaultProps = {
+        progressBarColor: "#f50",
+        updateBoxWidth: 250,
+        updateBoxHeight: 250,
+        updateBtnHeight: 38,
+        banner: require("./images/close.png")
+    }
+
     constructor(props) {
         super(props)
         this.state = {
@@ -52,6 +60,7 @@ class Box extends Component {
                     })
                 }
             })
+            .catch(ex => {})
     }
     androidUpdate = () => {
         // 下载apk
@@ -122,14 +131,15 @@ class Box extends Component {
 
     renderBottom = () => {
         let { progress } = this.state
+        let { progressBarColor, updateBtnHeight, updateBoxWidth } = this.props
         if (progress) {
             return (
                 <View style={styles.progressBar}>
                     <View
                         style={{
-                            backgroundColor: "#f50",
-                            height: 38,
-                            width: progress * 250
+                            backgroundColor: progressBarColor,
+                            height: updateBtnHeight,
+                            width: progress * updateBoxWidth
                         }}
                     />
                 </View>
@@ -145,11 +155,12 @@ class Box extends Component {
     }
     render() {
         let { modalVisible, progress, desc } = this.state
+        let { updateBoxWidth, updateBoxHeight, banner } = this.props
 
         return (
             <Modal
                 animationType={"slide"}
-                transparent={false}
+                transparent={true}
                 visible={modalVisible}
                 onRequestClose={() => {}}
             >
@@ -157,25 +168,36 @@ class Box extends Component {
                     <View
                         style={{
                             position: "absolute",
-                            right: (width - 250) / 2 - 16,
-                            top: (height - 250) / 2 - 16,
-                            zIndex: 2,
+                            right: (width - updateBoxWidth) / 2 - 16,
+                            top: (height - updateBoxHeight) / 2 - 16,
+                            zIndex: 999,
                             width: 32,
                             height: 32,
                             backgroundColor: "#e6e6e6",
-                            borderRadius: 16,
-                            alignItems: "center",
-                            justifyContent: "center"
+                            borderRadius: 16
                         }}
                     >
-                        <TouchableOpacity onPress={this.hideModal}>
+                        <TouchableOpacity
+                            onPress={this.hideModal}
+                            style={{
+                                width: 32,
+                                height: 32,
+                                alignItems: "center",
+                                justifyContent: "center"
+                            }}
+                        >
                             <Image
-                                source={require("./images/close.png")}
+                                source={banner}
                                 style={{ width: 20, height: 20 }}
                             />
                         </TouchableOpacity>
                     </View>
-                    <View style={styles.innerBox}>
+                    <View
+                        style={[
+                            styles.innerBox,
+                            { width: updateBoxWidth, height: updateBoxHeight }
+                        ]}
+                    >
                         <View>
                             <Image
                                 source={require("./images/1.png")}
@@ -201,15 +223,13 @@ class Box extends Component {
 
 const styles = StyleSheet.create({
     wrap: {
+        flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        width,
-        height
+        backgroundColor: "rgba(0, 0, 0, 0.3)"
     },
     innerBox: {
         backgroundColor: "#fff",
-        width: 250,
-        height: 250,
         borderRadius: 5,
         alignItems: "center",
         justifyContent: "space-between",
@@ -238,6 +258,4 @@ const styles = StyleSheet.create({
     }
 })
 
-RNUpdateApp.Box = Box
-
-export default RNUpdateApp
+export default RNUpdate
