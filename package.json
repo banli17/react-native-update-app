@@ -1,0 +1,33 @@
+{
+  "name": "react-native-update-app",
+  "author": "banli17",
+  "email": "867889876@qq.com",
+  "bugs": {
+    "url": "https://github.com/banli17/react-native-update-app/issues"
+  },
+  "description": "react native app硬更新升级，兼容 android 和 ios",
+  "homepage": "https://github.com/banli17/react-native-update-app#readme",
+  "keywords": [
+    "react-native",
+    "react-native-update-app",
+    "react-native-app-update",
+    "react-native-app-upgrade"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "peerDependencies": {
+    "react-native": "^0.41.2"
+  },
+  "dependencies": {
+    "react-native-cloud-image": "^1.0.3",
+    "react-native-fs": "^2.9.12"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/banli17/react-native-update-app.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.0.9"
+}
