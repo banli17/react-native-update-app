@@ -8,11 +8,15 @@
 
 ## 安装
 
-`$ npm install react-native-update-app --save`
+```
+npm install react-native-update-app --save`
+```
 
 ### 自动链接
 
-`$ react-native link react-native-update-app`
+```
+react-native link react-native-update-app`
+```
 
 ### 手动链接
 
@@ -33,14 +37,17 @@
 *   在 `getPackages()`方法里添加 `new RNUpdateAppPackage()` 
 
 2.  在 `android/settings.gradle` 加入:
-    ```
-    include ':react-native-update-app'
-    project(':react-native-update-app').projectDir = new File(rootProject.projectDir, 	'../node_modules/react-native-update-app/android')
-    ```
+
+```
+include ':react-native-update-app'
+project(':react-native-update-app').projectDir = new File(rootProject.projectDir, 	'../node_modules/react-native-update-app/android')
+```
+
 3.  在 `android/app/build.gradle` 里加入:
-    ```
-      compile project(':react-native-update-app')
-    ```
+
+```
+compile project(':react-native-update-app')
+```
 
 ## 使用
 
@@ -51,8 +58,8 @@ import RNUpdate from "react-native-update-app"
 
 // url 表示接口地址，在下面有详细介绍
 render() {
-	return (
-		<View>
+    return (
+        <View>
             <RNUpdate
                 url={"http://banli17.xxx.com/u.json"}  // json url
                 progressBarColor: "#f50",
@@ -60,9 +67,9 @@ render() {
                 updateBoxHeight: 250,    // 升级框的高度
                 updateBtnHeight: 38,     // 升级按钮的高度
                 banner={require('./imgs/a.png')}  // 换升级弹框图片
-             />
-		</View>
-	)
+            />
+</View>
+)
 }
 ```
 
@@ -72,7 +79,7 @@ render() {
 {
     "version": "1.1",
     "totalSize": "12000000",
-    "fromUrl": "http://down.4vtk.com/apk/ck-2.0.0.apk",
+    "fromUrl": "http://banli17.xxx.com/apk/ck-2.0.0.apk",
     "fileName": "ck-2.0.0.apk",
     "iosUrl": "",
     "desc": ["新增了收藏功能", "优化了整体性能"]
