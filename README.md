@@ -1,6 +1,6 @@
 # react-native-update-app
 
-全自动 apk 硬更新组件，简单易用。
+全自动 app 硬更新组件，简单易用。
 
 ## 预览
 
@@ -8,7 +8,8 @@
 
 ## 功能
 
-- Android点升级按钮全自动升级安装apk，IOS点升级按钮进入苹果商店下载
+- Android点击升级按钮全自动升级安装apk
+- IOS点击升级按钮进入苹果商店下载
 - 支持多主题(正在开发中...)，及自定义主题
 
 ## 安装
@@ -59,7 +60,7 @@ compile project(':react-native-update-app')
 
 ## 使用
 
-全自动检查版本进行更新升级，只需引入组件即可。
+全自动检查版本进行更新升级，只需在app的入口文件中引入组件即可。
 
 ```javascript
 import RNUpdate from "react-native-update-app"

@@ -25,7 +25,13 @@ class RNUpdate extends Component {
         updateBoxWidth: 250,
         updateBoxHeight: 250,
         updateBtnHeight: 38,
-        banner: require("./images/close.png")
+        updateBtnText: "立即更新",
+        banner: require("./images/1.png"),
+        bannerWidth: 250,
+        bannerHeight: 120,
+        successTips: "", // 包下载成功的提示
+        errorTips: "", // 下载发生错误的提示
+        CancelTips: "" // 用户取消升级的提示
     }
 
     constructor(props) {
@@ -131,7 +137,12 @@ class RNUpdate extends Component {
 
     renderBottom = () => {
         let { progress } = this.state
-        let { progressBarColor, updateBtnHeight, updateBoxWidth } = this.props
+        let {
+            progressBarColor,
+            updateBtnHeight,
+            updateBoxWidth,
+            updateBtnText
+        } = this.props
         if (progress) {
             return (
                 <View style={styles.progressBar}>
@@ -148,7 +159,7 @@ class RNUpdate extends Component {
         return (
             <TouchableOpacity onPress={this.updateApp}>
                 <View style={styles.updateBtn}>
-                    <Text style={styles.updateBtnText}>升级</Text>
+                    <Text style={styles.updateBtnText}>{updateBtnText}</Text>
                 </View>
             </TouchableOpacity>
         )
@@ -200,8 +211,11 @@ class RNUpdate extends Component {
                     >
                         <View>
                             <Image
-                                source={require("./images/1.png")}
-                                style={{ width: 150, height: 120 }}
+                                source={banner}
+                                style={{
+                                    width: bannerWidth || 150,
+                                    height: bannerHeight || 120
+                                }}
                             />
                         </View>
                         <View>
