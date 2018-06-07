@@ -1,4 +1,4 @@
-import React, { Component } from "react"
+import React, {Component} from "react"
 import {
     NativeModules,
     View,
@@ -10,12 +10,14 @@ import {
     Image,
     Alert,
     Platform,
-    Linking
+    Linking,
+    ImageBackground,
+    StatusBar
 } from "react-native"
 
-const { RNUpdateApp } = NativeModules
+const {RNUpdateApp} = NativeModules
 const RNFS = require("react-native-fs")
-const { width, height } = Dimensions.get("window")
+const {width, height} = Dimensions.get("window")
 const isIOS = Platform.OS == "ios"
 
 class RNUpdate extends Component {
@@ -26,9 +28,11 @@ class RNUpdate extends Component {
         updateBoxHeight: 250,
         updateBtnHeight: 38,
         updateBtnText: "立即更新",
-        banner: require("./images/1.png"),
+        bannerImage: require("./images/1.png"),
+        closeImage: require("./images/close.png"),
         bannerWidth: 250,
         bannerHeight: 120,
+        bannerResizeMode: Image.resizeMode.contain,
         successTips: "", // 包下载成功的提示
         errorTips: "", // 下载发生错误的提示
         CancelTips: "" // 用户取消升级的提示
@@ -51,12 +55,12 @@ class RNUpdate extends Component {
     }
 
     checkUpdate() {
-        let { url } = this.props
+        let {url} = this.props
         fetch(url)
             .then(res => res.json())
             .then(res => {
                 this.fetchRes = res
-                let { version, desc } = res
+                let {version, desc} = res
                 console.log(res)
                 if (version > RNUpdateApp.appVersion) {
                     // 需要更新，则弹出更新模态框
@@ -66,13 +70,15 @@ class RNUpdate extends Component {
                     })
                 }
             })
-            .catch(ex => {})
+            .catch(ex => {
+            })
     }
+
     androidUpdate = () => {
         // 下载apk
         // {fromUrl: 'android apk download url', fileName: 'apk filename', version: 'app version', totalSize: 'app total size'}
         let _this = this
-        const { fromUrl, fileName, totalSize } = this.fetchRes
+        const {fromUrl, fileName, totalSize} = this.fetchRes
         // 按照目录/包名/文件名 存放
         const toFile = `${RNFS.DocumentDirectoryPath}/${fileName}`
 
@@ -86,6 +92,7 @@ class RNUpdate extends Component {
             },
             progress(res) {
                 let progress = (res.bytesWritten / totalSize).toFixed(2, 10)
+                console.log(progress)
 
                 // 节流，此处 this 指向有问题，需要使用 _this
                 if (progress > _this.state.progress) {
@@ -94,17 +101,16 @@ class RNUpdate extends Component {
                     })
                 }
             }
+        }).promise.then(response => {
+            this.hideModal()
+            if (response.statusCode == 200) {
+                console.log("FILES UPLOADED!") // response.statusCode, response.headers, response.body
+                RNUpdateApp.install(toFile)
+            } else {
+                console.log("SERVER ERROR")
+                // 提示安装失败，关闭升级窗口
+            }
         })
-            .promise.then(response => {
-                if (response.statusCode == 200) {
-                    console.log("FILES UPLOADED!") // response.statusCode, response.headers, response.body
-                    RNUpdateApp.install(toFile)
-                } else {
-                    console.log("SERVER ERROR")
-                    // 提示安装失败，关闭升级窗口
-                }
-                this.hideModal()
-            })
             .catch(err => {
                 if (err.description === "cancelled") {
                     // cancelled by user
@@ -119,7 +125,7 @@ class RNUpdate extends Component {
             return
         }
 
-        let { iosUrl } = this.fetchRes
+        let {iosUrl} = this.fetchRes
         // 如果是ios，打开appstore连接
         Linking.openURL(iosUrl).catch(err =>
             console.error("An error occurred", err)
@@ -136,7 +142,7 @@ class RNUpdate extends Component {
     }
 
     renderBottom = () => {
-        let { progress } = this.state
+        let {progress} = this.state
         let {
             progressBarColor,
             updateBtnHeight,
@@ -164,24 +170,30 @@ class RNUpdate extends Component {
             </TouchableOpacity>
         )
     }
-    render() {
-        let { modalVisible, progress, desc } = this.state
-        let { updateBoxWidth, updateBoxHeight, banner } = this.props
 
+    render() {
+        let {modalVisible, progress, desc} = this.state
+        let {updateBoxWidth, updateBoxHeight, closeImage, bannerImage, bannerWidth, bannerHeight, bannerResizeMode} = this.props
         return (
             <Modal
-                animationType={"slide"}
+                animationType={"fade"}
                 transparent={true}
                 visible={modalVisible}
-                onRequestClose={() => {}}
+                onRequestClose={() => {
+                }}
             >
+                <StatusBar
+                    backgroundColor='rgba(0, 0, 0, 0.3)'
+                    barStyle="light-content"
+                    translucent={true}
+                />
                 <View style={styles.wrap}>
                     <View
                         style={{
                             position: "absolute",
                             right: (width - updateBoxWidth) / 2 - 16,
                             top: (height - updateBoxHeight) / 2 - 16,
-                            zIndex: 999,
+                            zIndex: 1,
                             width: 32,
                             height: 32,
                             backgroundColor: "#e6e6e6",
@@ -198,34 +210,35 @@ class RNUpdate extends Component {
                             }}
                         >
                             <Image
-                                source={banner}
-                                style={{ width: 20, height: 20 }}
+                                source={closeImage}
+                                style={{width: 20, height: 20}}
                             />
                         </TouchableOpacity>
                     </View>
                     <View
                         style={[
                             styles.innerBox,
-                            { width: updateBoxWidth, height: updateBoxHeight }
+                            {width: updateBoxWidth, height: updateBoxHeight}
                         ]}
                     >
-                        <View>
+                        <View style={{height: bannerHeight}}>
                             <Image
-                                source={banner}
                                 style={{
-                                    width: bannerWidth || 150,
-                                    height: bannerHeight || 120
+                                    width: bannerWidth,
+                                    height: bannerHeight,
+                                    resizeMode: bannerResizeMode
                                 }}
-                            />
+                                source={bannerImage}>
+                            </Image>
                         </View>
                         <View>
                             <Text>升级说明：</Text>
                             {desc &&
-                                desc.map((d, i) => {
-                                    return (
-                                        <Text key={i}>{i + 1 + ". " + d}</Text>
-                                    )
-                                })}
+                            desc.map((d, i) => {
+                                return (
+                                    <Text key={i}>{i + 1 + ". " + d}</Text>
+                                )
+                            })}
                         </View>
                         {this.renderBottom()}
                     </View>

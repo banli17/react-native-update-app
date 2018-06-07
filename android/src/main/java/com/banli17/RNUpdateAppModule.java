@@ -1,5 +1,5 @@
 
-package com.reactlibrary;
+package com.banli17;
 
 import android.content.Intent;
 import android.net.Uri;

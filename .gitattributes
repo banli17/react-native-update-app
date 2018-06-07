@@ -1,0 +1,4 @@
+*.pbxproj -text
+.vscode/
+.git/
+.idea/

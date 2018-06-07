@@ -1,0 +1,5 @@
+android/build/
+.idea/
+.vscode/
+.git/
+**/*/.DS_Store

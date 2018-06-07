@@ -23,9 +23,17 @@ npm install react-native-update-app --save
 
 ```
 react-native link react-native-update-app
+react-native link react-native-fs    // 因为依赖react-native-fs
 ```
 
-成功后，命令行窗口会有 `success` 字样提示。
+成功后，命令行窗口会有 `success` 字样提示。但是这里有个坑，它不会自动往`android/app/build.gradle`里加入下面这句，需要手动加上。
+
+```
+dependencies {
+    ...
+    compile project(':react-native-update-app')  // 添加这句
+}
+```
 
 ### 手动链接
 
@@ -55,7 +63,12 @@ project(':react-native-update-app').projectDir = new File(rootProject.projectDir
 3.  在 `android/app/build.gradle` 里加入:
 
 ```
-compile project(':react-native-update-app')
+dependencies {
+    ...
+    // 添加下面2句
+    compile project(':react-native-update-app')
+    compile project(':react-native-fs')
+}
 ```
 
 ## 使用
@@ -71,10 +84,10 @@ render() {
         <View>
             <RNUpdate
                 url={"http://banli17.xxx.com/u.json"}  // json url
-                progressBarColor: "#f50",
-                updateBoxWidth: 250,     // 升级框的宽度
-                updateBoxHeight: 250,    // 升级框的高度
-                updateBtnHeight: 38,     // 升级按钮的高度
+                progressBarColor="#f50"
+                updateBoxWidth={250},      // 升级框的宽度
+                updateBoxHeight={250}      // 升级框的高度
+                updateBtnHeight={38}       // 升级按钮的高度
                 banner={require('./imgs/a.png')}  // 换升级弹框图片
             />
 </View>
