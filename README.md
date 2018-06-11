@@ -31,6 +31,7 @@ react-native link react-native-fs    // 因为依赖react-native-fs
 ```
 dependencies {
     ...
+    compile project(':react-native-fs')
     compile project(':react-native-update-app')  // 添加这句
 }
 ```
