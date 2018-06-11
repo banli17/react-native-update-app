@@ -85,10 +85,10 @@ render() {
             <RNUpdate
                 url={"http://banli17.xxx.com/u.json"}  // json url
                 progressBarColor="#f50"
-                updateBoxWidth={250},      // 升级框的宽度
-                updateBoxHeight={250}      // 升级框的高度
-                updateBtnHeight={38}       // 升级按钮的高度
-                banner={require('./imgs/a.png')}  // 换升级弹框图片
+                updateBoxWidth={250},      // 选填，升级框的宽度
+                updateBoxHeight={250}      // 选填，升级框的高度
+                updateBtnHeight={38}       // 选填，升级按钮的高度
+                bannerImage={require('./imgs/a.png')}  // 选填，换升级弹框图片
             />
 </View>
 )
@@ -108,7 +108,7 @@ render() {
 }
 ```
 
-*   `version`: app 版本号，如果大于 app 当前版本号，则会弹出更新框
+*   `version`: app 版本号(`android/app/build.gradle`里`versionName`字段)，，如果大于当前版本号，则会弹出更新框
 *   `totalSize`: android app 的大小，单位是 byte
 *   `fromUrl` : android apk 下载地址
 *   `fileName`: apk 文件名
