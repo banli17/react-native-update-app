@@ -1,8 +1,13 @@
 
 package com.banli17;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.HttpURLConnection;
+import java.io.IOException;
 
 import android.content.Intent;
 import android.net.Uri;
+
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManager;
@@ -11,6 +16,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.Promise;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,17 +53,35 @@ public class RNUpdateAppModule extends ReactContextBaseJavaModule {
         return constants;
     }
 
-    @ReactMethod
-    public void install(String path) {
-        String cmd = "chmod 777 " + path;
-        try {
-            Runtime.getRuntime().exec(cmd);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setDataAndType(Uri.parse("file://" + path), "application/vnd.android.package-archive");
-        reactContext.startActivity(intent);
+@ReactMethod
+public void install(String path) {
+    String cmd = "chmod 777 " + path;
+    try {
+        Runtime.getRuntime().exec(cmd);
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+    Intent intent = new Intent(Intent.ACTION_VIEW);
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    intent.setDataAndType(Uri.parse("file://" + path), "application/vnd.android.package-archive");
+    reactContext.startActivity(intent);
+}
+
+@ReactMethod
+public void getFileSize(String path,Promise promise) throws Exception{
+    URL url = new URL(path);
+    HttpURLConnection conn = null;
+    try {
+        conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("HEAD");
+        conn.getInputStream();
+        promise.resolve("" + conn.getContentLength());
+
+    } catch (IOException e) {
+        promise.reject("-1");
+    } finally {
+        conn.disconnect();
+    }
+}
+
 }

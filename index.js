@@ -22,6 +22,7 @@ const RNFS = require("react-native-fs")
 const {width, height} = Dimensions.get("window")
 const isIOS = Platform.OS == "ios"
 
+
 class RNUpdate extends Component {
     // 定义默认属性
     static defaultProps = {
@@ -47,6 +48,7 @@ class RNUpdate extends Component {
             progress: 0,
             modalVisible: false,
             desc: [], //更新说明
+            fileSize: -1
         }
 
         this.jobId = 0 // 下载任务的id，用来停止下载
@@ -63,17 +65,26 @@ class RNUpdate extends Component {
         let {url} = this.props
         fetch(url)
             .then(res => res.json())
-            .then(res => {
+            .then(async (res) => {
                 this.fetchRes = res
                 let {version, desc} = res
 
                 if (version > RNUpdateApp.appVersion) {
-                    // 1.需要升级，首先获取文件大小
-                    // 2.弹出更新模态框
-                    this.setState({
-                        modalVisible: true,
-                        desc
-                    })
+                    try {
+                        RNUpdateApp.getFileSize(res.url).then(fileSize => {
+                            fileSize = Number(fileSize / 1024 / 1024).toFixed(2, 10)
+                            this.setState({
+                                modalVisible: true,
+                                desc,
+                                fileSize
+                            })
+                        })
+                    } catch (e) {
+                        this.setState({
+                            modalVisible: true,
+                            desc
+                        })
+                    }
                 }
             })
             .catch(ex => {
@@ -96,7 +107,7 @@ class RNUpdate extends Component {
         RNFS.downloadFile({
             fromUrl: url,
             toFile,
-            progressDivider: 10,   // 节流
+            progressDivider: 2,   // 节流
             begin(res) {
                 _this.jobId = res.jobId   // 设置jobId，用于暂停和恢复下载任务
             },
@@ -174,7 +185,7 @@ class RNUpdate extends Component {
                             width: progress * updateBoxWidth,
                         }}
                     />
-                    <Text style={styles.updateBtnText}>下载中{progress * 100}%</Text>
+                    <Text style={styles.updateBtnText}>下载中{parseInt(progress * 100, 10)}%</Text>
                 </View>
             )
         }
@@ -237,8 +248,8 @@ class RNUpdate extends Component {
     }
 
     render() {
-        let {modalVisible, progress, desc} = this.state
-        let {updateBoxWidth, updateBoxHeight} = this.props
+        let {modalVisible, progress, desc, fileSize} = this.state
+        let { updateBoxWidth, updateBoxHeight} = this.props
         return (
             <Modal
                 animationType={"fade"}
@@ -259,7 +270,8 @@ class RNUpdate extends Component {
                         ]}>
                         {this.renderBanner()}
                         <View style={{width: updateBoxWidth, height: 85}}>
-                            <ScrollView style={{padding: 10}}>
+                            <ScrollView style={{paddingLeft: 10, paddingRight: 10}}>
+                                <Text>文件大小：{fileSize}M</Text>
                                 <Text>升级说明：</Text>
                                 {desc &&
                                 desc.map((d, i) => {

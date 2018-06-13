@@ -14,7 +14,10 @@
 
 ## 安装
 
+因为该库依赖`react-native-fs`，所以首先需要安装它。具体点击查看[react-native-fs](https://github.com/itinance/react-native-fs)。
+
 ### 安装npm
+
 ```
 npm install react-native-update-app --save
 ```
@@ -23,18 +26,18 @@ npm install react-native-update-app --save
 
 ```
 react-native link react-native-update-app
-react-native link react-native-fs    // 因为依赖react-native-fs
 ```
 
-成功后，命令行窗口会有 `success` 字样提示。但是这里有个坑，它不会自动往`android/app/build.gradle`里加入下面这句，需要手动加上。
+成功后，命令行窗口会有 `success` 字样提示。但是这里有个坑，有时它不会自动往`android/app/build.gradle`里加入下面这句，需要手动加上。
 
 ```
 dependencies {
     ...
-    compile project(':react-native-fs')
     compile project(':react-native-update-app')  // 添加这句
 }
 ```
+
+当然如果你的代码里已经有上面一句了，就不需要添加了。
 
 ### 手动链接
 
@@ -66,9 +69,7 @@ project(':react-native-update-app').projectDir = new File(rootProject.projectDir
 ```
 dependencies {
     ...
-    // 添加下面2句
     compile project(':react-native-update-app')
-    compile project(':react-native-fs')
 }
 ```
 
