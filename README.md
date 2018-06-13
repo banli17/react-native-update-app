@@ -4,7 +4,7 @@
 
 ## 预览
 
-<img src="./preview/1.gif" width="120" height="190" />
+<img src="./preview/1.gif" width="320" height="568" />
 
 ## 功能
 
