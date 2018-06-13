@@ -4,7 +4,7 @@
 
 ## 预览
 
-![](./preview/1.gif)
+<img src="./preview/1.gif" width="120" height="190" />
 
 ## 功能
 
