@@ -4,7 +4,7 @@
 
 ## 预览
 
-![](./preview/s1.png)
+![](./preview/1.gif)
 
 ## 功能
 
@@ -91,27 +91,29 @@ render() {
                 updateBtnHeight={38}       // 选填，升级按钮的高度
                 bannerImage={require('./imgs/a.png')}  // 选填，换升级弹框图片
             />
-</View>
-)
+        </View>
+    )
 }
 ```
+
+`react-native-update-app`里自动发送了一个platform字段给后端url。值是`ios`或`android`。后端获取这个字段后，返回不同的`json`数据。
 
 下面是 u.json 的数据格式：
 
 ```json
 {
     "version": "1.1",
-    "totalSize": "12000000",
-    "fromUrl": "http://banli17.xxx.com/apk/ck-2.0.0.apk",
-    "fileName": "ck-2.0.0.apk",
-    "iosUrl": "",
+    "url": "http://banli17.xxx.com/apk/ck-2.0.0.apk",
+    "fileName": "ck-2.0.0",
     "desc": ["新增了收藏功能", "优化了整体性能"]
 }
 ```
 
 *   `version`: app 版本号(`android/app/build.gradle`里`versionName`字段)，，如果大于当前版本号，则会弹出更新框
-*   `totalSize`: android app 的大小，单位是 byte
-*   `fromUrl` : android apk 下载地址
+*   `url` : 如果是android，返回 android apk 下载地址，如果是ios，返回 ios应用商店的对应 url。(根据上面的platform字段区分)
 *   `fileName`: apk 文件名
-*   `iosUrl`: ios appstore 的下载地址
 *   `desc`: 更新说明
+
+## 注意事项
+
+1. `react-native-fs`获取文件大小时，是根据请求头的`Content-Length`获取的。如果获取错误，则需要后端修改。

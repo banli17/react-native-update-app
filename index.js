@@ -12,7 +12,9 @@ import {
     Platform,
     Linking,
     ImageBackground,
-    StatusBar
+    StatusBar,
+    ToastAndroid,
+    ScrollView
 } from "react-native"
 
 const {RNUpdateApp} = NativeModules
@@ -28,14 +30,15 @@ class RNUpdate extends Component {
         updateBoxHeight: 250,
         updateBtnHeight: 38,
         updateBtnText: "立即更新",
-        bannerImage: require("./images/1.png"),
-        closeImage: require("./images/close.png"),
+        theme: 1,
         bannerWidth: 250,
         bannerHeight: 120,
         bannerResizeMode: Image.resizeMode.contain,
         successTips: "", // 包下载成功的提示
         errorTips: "", // 下载发生错误的提示
-        CancelTips: "" // 用户取消升级的提示
+        CancelTips: "", // 用户取消升级的提示
+        bannerImage: require('./theme/1/banner.png'),
+        closeImage: require('./theme/1/close.png'),
     }
 
     constructor(props) {
@@ -43,11 +46,13 @@ class RNUpdate extends Component {
         this.state = {
             progress: 0,
             modalVisible: false,
-            desc: [] //更新说明
+            desc: [], //更新说明
         }
 
         this.jobId = 0 // 下载任务的id，用来停止下载
         this.fetchRes = {} // 远程请求更新的json数据
+
+
     }
 
     componentWillMount() {
@@ -61,9 +66,10 @@ class RNUpdate extends Component {
             .then(res => {
                 this.fetchRes = res
                 let {version, desc} = res
-                console.log(res)
+
                 if (version > RNUpdateApp.appVersion) {
-                    // 需要更新，则弹出更新模态框
+                    // 1.需要升级，首先获取文件大小
+                    // 2.弹出更新模态框
                     this.setState({
                         modalVisible: true,
                         desc
@@ -74,34 +80,35 @@ class RNUpdate extends Component {
             })
     }
 
+    errorTips = () => {
+        ToastAndroid.show("安装失败",
+            ToastAndroid.SHORT,
+            ToastAndroid.BOTTOM
+        )
+    }
+
     androidUpdate = () => {
-        // 下载apk
-        // {fromUrl: 'android apk download url', fileName: 'apk filename', version: 'app version', totalSize: 'app total size'}
         let _this = this
-        const {fromUrl, fileName, totalSize} = this.fetchRes
+        const {url, fileName} = this.fetchRes
         // 按照目录/包名/文件名 存放
         const toFile = `${RNFS.DocumentDirectoryPath}/${fileName}`
 
-        console.log(toFile)
         RNFS.downloadFile({
-            fromUrl,
+            fromUrl: url,
             toFile,
+            progressDivider: 10,   // 节流
             begin(res) {
-                console.log(res)
-                _this.jobId = res.jobId
+                _this.jobId = res.jobId   // 设置jobId，用于暂停和恢复下载任务
             },
             progress(res) {
-                let progress = (res.bytesWritten / totalSize).toFixed(2, 10)
-                console.log(progress)
-
-                // 节流，此处 this 指向有问题，需要使用 _this
-                if (progress > _this.state.progress) {
-                    _this.setState({
-                        progress
-                    })
-                }
+                let progress = (res.bytesWritten / res.contentLength).toFixed(2, 10)
+                // 此处 this 指向有问题，需要使用 _this
+                _this.setState({
+                    progress
+                })
             }
         }).promise.then(response => {
+            // 下载完成后
             this.hideModal()
             if (response.statusCode == 200) {
                 console.log("FILES UPLOADED!") // response.statusCode, response.headers, response.body
@@ -109,11 +116,12 @@ class RNUpdate extends Component {
             } else {
                 console.log("SERVER ERROR")
                 // 提示安装失败，关闭升级窗口
+                this.errorTips()
             }
         })
             .catch(err => {
                 if (err.description === "cancelled") {
-                    // cancelled by user
+                    this.errorTips()
                 }
                 this.hideModal()
             })
@@ -141,6 +149,10 @@ class RNUpdate extends Component {
         this.jobId && RNFS.stopDownload(this.jobId)
     }
 
+    componentWillUnmount() {
+        this.hideModal()
+    }
+
     renderBottom = () => {
         let {progress} = this.state
         let {
@@ -154,11 +166,15 @@ class RNUpdate extends Component {
                 <View style={styles.progressBar}>
                     <View
                         style={{
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
                             backgroundColor: progressBarColor,
-                            height: updateBtnHeight,
-                            width: progress * updateBoxWidth
+                            height: 3,
+                            width: progress * updateBoxWidth,
                         }}
                     />
+                    <Text style={styles.updateBtnText}>下载中{progress * 100}%</Text>
                 </View>
             )
         }
@@ -171,9 +187,58 @@ class RNUpdate extends Component {
         )
     }
 
+    renderCloseBtn = () => {
+        let {closeImage, updateBoxWidth, updateBoxHeight} = this.props
+        return (
+            <View
+                style={{
+                    position: "absolute",
+                    right: (width - updateBoxWidth) / 2 - 16,
+                    top: (height - updateBoxHeight) / 2 - 28,
+                    zIndex: 1,
+                    width: 32,
+                    height: 32,
+                    backgroundColor: "#e6e6e6",
+                    borderRadius: 16
+                }}
+            >
+                <TouchableOpacity
+                    onPress={this.hideModal}
+                    style={{
+                        width: 32,
+                        height: 32,
+                        alignItems: "center",
+                        justifyContent: "center"
+                    }}
+                >
+                    <Image
+                        source={closeImage}
+                        style={{width: 20, height: 20}}
+                    />
+                </TouchableOpacity>
+            </View>
+        )
+    }
+
+    renderBanner = () => {
+        let {bannerImage, bannerWidth, bannerHeight, bannerResizeMode} = this.props
+        return (
+            <View style={{height: bannerHeight}}>
+                <Image
+                    style={{
+                        width: bannerWidth,
+                        height: bannerHeight,
+                        resizeMode: bannerResizeMode
+                    }}
+                    source={bannerImage}>
+                </Image>
+            </View>
+        )
+    }
+
     render() {
         let {modalVisible, progress, desc} = this.state
-        let {updateBoxWidth, updateBoxHeight, closeImage, bannerImage, bannerWidth, bannerHeight, bannerResizeMode} = this.props
+        let {updateBoxWidth, updateBoxHeight} = this.props
         return (
             <Modal
                 animationType={"fade"}
@@ -183,62 +248,26 @@ class RNUpdate extends Component {
                 }}
             >
                 <StatusBar
-                    backgroundColor='rgba(0, 0, 0, 0.3)'
-                    barStyle="light-content"
-                    translucent={true}
+                    backgroundColor='rgb(38, 130, 73)'
                 />
                 <View style={styles.wrap}>
-                    <View
-                        style={{
-                            position: "absolute",
-                            right: (width - updateBoxWidth) / 2 - 16,
-                            top: (height - updateBoxHeight) / 2 - 16,
-                            zIndex: 1,
-                            width: 32,
-                            height: 32,
-                            backgroundColor: "#e6e6e6",
-                            borderRadius: 16
-                        }}
-                    >
-                        <TouchableOpacity
-                            onPress={this.hideModal}
-                            style={{
-                                width: 32,
-                                height: 32,
-                                alignItems: "center",
-                                justifyContent: "center"
-                            }}
-                        >
-                            <Image
-                                source={closeImage}
-                                style={{width: 20, height: 20}}
-                            />
-                        </TouchableOpacity>
-                    </View>
+                    {this.renderCloseBtn()}
                     <View
                         style={[
                             styles.innerBox,
                             {width: updateBoxWidth, height: updateBoxHeight}
-                        ]}
-                    >
-                        <View style={{height: bannerHeight}}>
-                            <Image
-                                style={{
-                                    width: bannerWidth,
-                                    height: bannerHeight,
-                                    resizeMode: bannerResizeMode
-                                }}
-                                source={bannerImage}>
-                            </Image>
-                        </View>
-                        <View>
-                            <Text>升级说明：</Text>
-                            {desc &&
-                            desc.map((d, i) => {
-                                return (
-                                    <Text key={i}>{i + 1 + ". " + d}</Text>
-                                )
-                            })}
+                        ]}>
+                        {this.renderBanner()}
+                        <View style={{width: updateBoxWidth, height: 85}}>
+                            <ScrollView style={{padding: 10}}>
+                                <Text>升级说明：</Text>
+                                {desc &&
+                                desc.map((d, i) => {
+                                    return (
+                                        <Text key={i}>{i + 1 + ". " + d}</Text>
+                                    )
+                                })}
+                            </ScrollView>
                         </View>
                         {this.renderBottom()}
                     </View>
@@ -281,8 +310,11 @@ const styles = StyleSheet.create({
         borderTopColor: "#eee",
         width: 250,
         height: 37,
-        alignItems: "flex-start"
-    }
+        alignItems: "center",
+        justifyContent: 'center',
+
+    },
+
 })
 
 export default RNUpdate
