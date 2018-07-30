@@ -80,40 +80,58 @@ dependencies {
 ```javascript
 import RNUpdate from "react-native-update-app"
 
-// url 表示接口地址，在下面有详细介绍
-render() {
-    return (
-        <View>
-            <RNUpdate
-                url={"http://banli17.xxx.com/u.json"}  // json url
-                progressBarColor="#f50"
-                updateBoxWidth={250},      // 选填，升级框的宽度
-                updateBoxHeight={250}      // 选填，升级框的高度
-                updateBtnHeight={38}       // 选填，升级按钮的高度
-                bannerImage={require('./imgs/a.png')}  // 选填，换升级弹框图片
-            />
-        </View>
-    )
+class App extends Component{
+    // url 表示接口地址，在下面有详细介绍
+    onBeforeStart = async ()=>{
+        // 在这里可以发请求，用promise返回结果
+        let res = await toolApi.updateApp() 
+        return res.data
+        /*返回结果 res 如下
+        {
+            "data": {
+                "version":"1.1",
+                "filename":"微信.apk",
+                "url":"http://gdown.baidu.com/data/wisegame/785f37df5d72c409/weixin_1320.apk",
+                "desc":["更新了一些bug", "修复了一些UI问题"]
+            },
+            "error":{"code":0}
+        }*/
+    }
+
+    render() {
+        return (
+            <View>
+                <RNUpdate
+                    onBeforeStart={this.onBeforeStart}
+                    progressBarColor="#f50"
+                    updateBoxWidth={250},      // 选填，升级框的宽度
+                    updateBoxHeight={250}      // 选填，升级框的高度
+                    updateBtnHeight={38}       // 选填，升级按钮的高度
+                    bannerImage={require('./imgs/a.png')}  // 选填，换升级弹框图片
+                />
+            </View>
+        )
+    }
 }
 ```
 
-`react-native-update-app`里自动发送了一个platform字段给后端url。值是`ios`或`android`。后端获取这个字段后，返回不同的`json`数据。
-
-下面是 u.json 的数据格式：
-
-```json
-{
-    "version": "1.1",
-    "url": "http://banli17.xxx.com/apk/ck-2.0.0.apk",
-    "fileName": "ck-2.0.0",
-    "desc": ["新增了收藏功能", "优化了整体性能"]
-}
-```
+onBeforeStart函数返回一个RNUpdate组件的配置对象。格式如上代码所示。
 
 *   `version`: app 版本号(`android/app/build.gradle`里`versionName`字段)，，如果大于当前版本号，则会弹出更新框
 *   `url` : 如果是android，返回 android apk 下载地址，如果是ios，返回 ios应用商店的对应 url。(根据上面的platform字段区分)
 *   `fileName`: apk 文件名
 *   `desc`: 更新说明
+
+如果需要在其他地方调用，可以使用下面代码。
+
+```javascript
+<RNUpdate ref={r=>global.$RNUpdate = r} />
+
+async ()=>{
+    let res = await toolApi.updateApp() 
+    $RNUpdate.updateApp(res.data)
+}
+```
 
 ## 注意事项
 

@@ -34,7 +34,7 @@ class RNUpdate extends Component {
         theme: 1,
         bannerWidth: 250,
         bannerHeight: 120,
-        bannerResizeMode: Image.resizeMode.contain,
+        bannerResizeMode: 'contain',
         successTips: "", // 包下载成功的提示
         errorTips: "", // 下载发生错误的提示
         CancelTips: "", // 用户取消升级的提示
@@ -57,38 +57,42 @@ class RNUpdate extends Component {
 
     }
 
-    componentWillMount() {
-        this.checkUpdate()
+    async componentWillMount() {
+        if (this.props.onBeforeStart) {
+            let res = await this.props.onBeforeStart()
+            this.checkUpdate(res)
+        }
     }
 
-    checkUpdate() {
-        let {url} = this.props
-        fetch(url)
-            .then(res => res.json())
-            .then(async (res) => {
-                this.fetchRes = res
-                let {version, desc} = res
+    checkUpdate(fetchRes) {
+        try {
+            this.fetchRes = fetchRes
+            let {version, desc} = fetchRes
 
-                if (version > RNUpdateApp.appVersion) {
-                    try {
-                        RNUpdateApp.getFileSize(res.url).then(fileSize => {
-                            fileSize = Number(fileSize / 1024 / 1024).toFixed(2, 10)
-                            this.setState({
-                                modalVisible: true,
-                                desc,
-                                fileSize
-                            })
-                        })
-                    } catch (e) {
+            if (!Array.isArray(desc)) {
+                desc = [desc]
+            }
+
+            if (version > RNUpdateApp.appVersion) {
+                try {
+                    RNUpdateApp.getFileSize(res.url).then(fileSize => {
+                        fileSize = Number(fileSize / 1024 / 1024).toFixed(2, 10)
                         this.setState({
                             modalVisible: true,
-                            desc
+                            desc,
+                            fileSize
                         })
-                    }
+                    })
+                } catch (e) {
+                    this.setState({
+                        modalVisible: true,
+                        desc
+                    })
                 }
-            })
-            .catch(ex => {
-            })
+            }
+        } catch (e) {
+            console.error('checkUpdate', e)
+        }
     }
 
     errorTips = () => {
@@ -131,7 +135,7 @@ class RNUpdate extends Component {
             }
         })
             .catch(err => {
-                if (err.description === "cancelled") {
+                if (err.description == "cancelled") {
                     this.errorTips()
                 }
                 this.hideModal()
@@ -249,7 +253,7 @@ class RNUpdate extends Component {
 
     render() {
         let {modalVisible, progress, desc, fileSize} = this.state
-        let { updateBoxWidth, updateBoxHeight} = this.props
+        let {updateBoxWidth, updateBoxHeight} = this.props
         return (
             <Modal
                 animationType={"fade"}
