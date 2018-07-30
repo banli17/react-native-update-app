@@ -53,35 +53,34 @@ public class RNUpdateAppModule extends ReactContextBaseJavaModule {
         return constants;
     }
 
-@ReactMethod
-public void install(String path) {
-    String cmd = "chmod 777 " + path;
-    try {
-        Runtime.getRuntime().exec(cmd);
-    } catch (Exception e) {
-        e.printStackTrace();
+    @ReactMethod
+    public void install(String path) {
+        String cmd = "chmod 777 " + path;
+        try {
+            Runtime.getRuntime().exec(cmd);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setDataAndType(Uri.parse("file://" + path), "application/vnd.android.package-archive");
+        reactContext.startActivity(intent);
     }
-    Intent intent = new Intent(Intent.ACTION_VIEW);
-    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    intent.setDataAndType(Uri.parse("file://" + path), "application/vnd.android.package-archive");
-    reactContext.startActivity(intent);
-}
 
-@ReactMethod
-public void getFileSize(String path,Promise promise) throws Exception{
-    URL url = new URL(path);
-    HttpURLConnection conn = null;
-    try {
-        conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("HEAD");
-        conn.getInputStream();
-        promise.resolve("" + conn.getContentLength());
+    @ReactMethod
+    public void getFileSize(String path,Promise promise) throws Exception{
+        URL url = new URL(path);
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("HEAD");
+            conn.getInputStream();
+            promise.resolve("" + conn.getContentLength());
 
-    } catch (IOException e) {
-        promise.reject("-1");
-    } finally {
-        conn.disconnect();
+        } catch (IOException e) {
+            promise.reject("-1");
+        } finally {
+            conn.disconnect();
+        }
     }
-}
-
 }
