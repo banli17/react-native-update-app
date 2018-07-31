@@ -48,12 +48,13 @@ class RNUpdate extends Component {
             progress: 0,
             modalVisible: false,
             desc: [], //更新说明
-            fileSize: -1
+            fileSize: -1,
         }
 
         this.jobId = 0 // 下载任务的id，用来停止下载
         this.fetchRes = {} // 远程请求更新的json数据
 
+        this.loading = false // 是否在下载中
 
     }
 
@@ -75,7 +76,7 @@ class RNUpdate extends Component {
 
             if (version > RNUpdateApp.appVersion) {
                 try {
-                    RNUpdateApp.getFileSize(res.url).then(fileSize => {
+                    RNUpdateApp.getFileSize(this.fetchRes.url).then(fileSize => {
                         fileSize = Number(fileSize / 1024 / 1024).toFixed(2, 10)
                         this.setState({
                             modalVisible: true,
@@ -105,8 +106,8 @@ class RNUpdate extends Component {
     androidUpdate = () => {
         let _this = this
         const {url, filename, version} = this.fetchRes
-        // 按照目录/包名/文件名+版本号 存放
-        const toFile = `${RNFS.DocumentDirectoryPath}/${filename}${version}.apk`
+        // 按照目录/包名/文件名 存放
+        const toFile = `${RNFS.ExternalDirectoryPath}/${filename}${version}.apk`
 
         RNFS.downloadFile({
             fromUrl: url,
@@ -114,6 +115,7 @@ class RNUpdate extends Component {
             progressDivider: 2,   // 节流
             begin(res) {
                 _this.jobId = res.jobId   // 设置jobId，用于暂停和恢复下载任务
+                this.loading = true
             },
             progress(res) {
                 let progress = (res.bytesWritten / res.contentLength).toFixed(2, 10)
@@ -126,31 +128,35 @@ class RNUpdate extends Component {
             // 下载完成后
             this.hideModal()
             if (response.statusCode == 200) {
-                console.log("FILES UPLOADED!") // response.statusCode, response.headers, response.body
+                // console.log("FILES UPLOADED!") // response.statusCode, response.headers, response.body
                 RNUpdateApp.install(toFile)
+
             } else {
-                console.log("SERVER ERROR")
                 // 提示安装失败，关闭升级窗口
                 this.errorTips()
             }
+
+            this.loading = false
         })
             .catch(err => {
-                if (err.description == "cancelled") {
+                if (err.description == "cancegetFileSizelled") {
                     this.errorTips()
                 }
                 this.hideModal()
             })
     }
     updateApp = () => {
+        // 如果已经开始下注
+        if (this.loading) return
         // 如果是android
         if (!isIOS) {
             this.androidUpdate()
             return
         }
 
-        let {iosUrl} = this.fetchRes
+        let {url} = this.fetchRes
         // 如果是ios，打开appstore连接
-        Linking.openURL(iosUrl).catch(err =>
+        Linking.openURL(url).catch(err =>
             console.error("An error occurred", err)
         )
     }
@@ -209,7 +215,7 @@ class RNUpdate extends Component {
                 style={{
                     position: "absolute",
                     right: (width - updateBoxWidth) / 2 - 16,
-                    top: (height - updateBoxHeight) / 2 - 28,
+                    top: (height - updateBoxHeight) / 2 - 16,
                     zIndex: 1,
                     width: 32,
                     height: 32,
@@ -262,9 +268,6 @@ class RNUpdate extends Component {
                 onRequestClose={() => {
                 }}
             >
-                <StatusBar
-                    backgroundColor='rgb(38, 130, 73)'
-                />
                 <View style={styles.wrap}>
                     {this.renderCloseBtn()}
                     <View

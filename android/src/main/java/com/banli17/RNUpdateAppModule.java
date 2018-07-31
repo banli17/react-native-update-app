@@ -4,10 +4,18 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.HttpURLConnection;
 import java.io.IOException;
+import java.lang.reflect.Method;
+
+import android.support.v4.content.FileProvider;
+import android.os.Environment;
+import android.os.StrictMode;
+
+import android.util.Log;
 
 import android.content.Intent;
 import android.net.Uri;
-
+import android.os.Build;
+import java.io.File;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManager;
@@ -53,34 +61,44 @@ public class RNUpdateAppModule extends ReactContextBaseJavaModule {
         return constants;
     }
 
-    @ReactMethod
-    public void install(String path) {
-        String cmd = "chmod 777 " + path;
-        try {
-            Runtime.getRuntime().exec(cmd);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setDataAndType(Uri.parse("file://" + path), "application/vnd.android.package-archive");
-        reactContext.startActivity(intent);
-    }
 
-    @ReactMethod
-    public void getFileSize(String path,Promise promise) throws Exception{
-        URL url = new URL(path);
-        HttpURLConnection conn = null;
-        try {
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("HEAD");
-            conn.getInputStream();
-            promise.resolve("" + conn.getContentLength());
+@ReactMethod
+public void install(String path) {
+    Intent intent = new Intent(Intent.ACTION_VIEW);
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        } catch (IOException e) {
-            promise.reject("-1");
-        } finally {
-            conn.disconnect();
-        }
+    Uri apkUri = null;
+    File apkFile = new File(Uri.parse("file://" + path).getPath());
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
+        apkUri = FileProvider.getUriForFile(reactContext, reactContext.getApplicationContext().getPackageName() +".fileprovider", apkFile);
+
+        //添加这一句表示对目标应用临时授权该Uri所代表的文件
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+    } else {
+        apkUri = Uri.parse("file://" + path);
     }
+    intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+    reactContext.startActivity(intent);
+}
+
+@ReactMethod
+public void getFileSize(String path,Promise promise) throws Exception{
+    URL url = new URL(path);
+    HttpURLConnection conn = null;
+    try {
+        conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("HEAD");
+        conn.getInputStream();
+        promise.resolve("" + conn.getContentLength());
+
+    } catch (IOException e) {
+        promise.reject("-1");
+    } finally {
+        conn.disconnect();
+    }
+}
+
 }

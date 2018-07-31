@@ -73,6 +73,28 @@ dependencies {
 }
 ```
 
+## 注意
+
+在主程序`android/app/src/main/AndroidManifest.xml`里增加下面代码。
+
+```
+<application ..>
+...
+        // 增加下面代码
+    <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:grantUriPermissions="true"
+            tools:replace="android:authorities"
+            android:exported="false">
+        <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                tools:replace="android:resource"
+                android:resource="@xml/provider_paths"/>
+    </provider>
+</application>
+```
+
 ## 使用
 
 全自动检查版本进行更新升级，只需在app的入口文件中引入组件即可。
