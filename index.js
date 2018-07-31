@@ -104,9 +104,9 @@ class RNUpdate extends Component {
 
     androidUpdate = () => {
         let _this = this
-        const {url, fileName} = this.fetchRes
-        // 按照目录/包名/文件名 存放
-        const toFile = `${RNFS.DocumentDirectoryPath}/${fileName}`
+        const {url, filename, version} = this.fetchRes
+        // 按照目录/包名/文件名+版本号 存放
+        const toFile = `${RNFS.DocumentDirectoryPath}/${filename}${version}.apk`
 
         RNFS.downloadFile({
             fromUrl: url,
