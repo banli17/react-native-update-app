@@ -56,6 +56,7 @@ class RNUpdate extends Component {
 
         this.loading = false // 是否在下载中
 
+        this.filePath = ''
     }
 
     async componentWillMount() {
@@ -65,10 +66,26 @@ class RNUpdate extends Component {
         }
     }
 
-    checkUpdate(fetchRes) {
+    reset() {
+        this.setState({
+            progress: 0,
+            modalVisible: false,
+            desc: [], //更新说明
+            fileSize: -1,
+        })
+
+        this.jobId = 0 // 下载任务的id，用来停止下载
+        this.fetchRes = {} // 远程请求更新的json数据
+
+        this.loading = false // 是否在下载中
+    }
+
+    checkUpdate(fetchRes, isManual) {
         try {
             this.fetchRes = fetchRes
             let {version, desc} = fetchRes
+
+            // 安装包下载目录
 
             if (!Array.isArray(desc)) {
                 desc = [desc]
@@ -76,8 +93,9 @@ class RNUpdate extends Component {
 
             if (version > RNUpdateApp.appVersion) {
                 try {
-                    RNUpdateApp.getFileSize(this.fetchRes.url).then(fileSize => {
+                    RNUpdateApp.getFileSize(this.fetchRes.url).then(async fileSize => {
                         fileSize = Number(fileSize / 1024 / 1024).toFixed(2, 10)
+
                         this.setState({
                             modalVisible: true,
                             desc,
@@ -89,6 +107,13 @@ class RNUpdate extends Component {
                         modalVisible: true,
                         desc
                     })
+                }
+            } else {
+                if (isManual) {
+                    ToastAndroid.show("已经是最新版本",
+                        ToastAndroid.SHORT,
+                        ToastAndroid.BOTTOM
+                    )
                 }
             }
         } catch (e) {
@@ -103,15 +128,25 @@ class RNUpdate extends Component {
         )
     }
 
-    androidUpdate = () => {
+    androidUpdate = async () => {
         let _this = this
         const {url, filename, version} = this.fetchRes
-        // 按照目录/包名/文件名 存放
-        const toFile = `${RNFS.ExternalDirectoryPath}/${filename}${version}.apk`
+        // 按照目录/包名/文件名 存放，生成md5文件标识
 
+        this.filePath = `${RNFS.ExternalDirectoryPath}/${filename}${version}.apk`
+        
+        // 检查包是否已经下载过，如果有，则直接安装
+        let exist = await RNFS.exists(this.filePath)
+        if (exist) {
+            RNUpdateApp.install(this.filePath)
+            this.hideModal()
+            return
+        }
+
+        // 下载apk并安装
         RNFS.downloadFile({
             fromUrl: url,
-            toFile,
+            toFile: this.filePath,
             progressDivider: 2,   // 节流
             begin(res) {
                 _this.jobId = res.jobId   // 设置jobId，用于暂停和恢复下载任务
@@ -129,7 +164,7 @@ class RNUpdate extends Component {
             this.hideModal()
             if (response.statusCode == 200) {
                 // console.log("FILES UPLOADED!") // response.statusCode, response.headers, response.body
-                RNUpdateApp.install(toFile)
+                RNUpdateApp.install(this.filePath)
 
             } else {
                 // 提示安装失败，关闭升级窗口
@@ -145,8 +180,10 @@ class RNUpdate extends Component {
                 this.hideModal()
             })
     }
+
+
     updateApp = () => {
-        // 如果已经开始下注
+        // 如果已经开始下载
         if (this.loading) return
         // 如果是android
         if (!isIOS) {
@@ -182,7 +219,7 @@ class RNUpdate extends Component {
             updateBoxWidth,
             updateBtnText
         } = this.props
-        if (progress) {
+        if (progress > 0 && progress < 1) {
             return (
                 <View style={styles.progressBar}>
                     <View
@@ -202,7 +239,7 @@ class RNUpdate extends Component {
         return (
             <TouchableOpacity onPress={this.updateApp}>
                 <View style={styles.updateBtn}>
-                    <Text style={styles.updateBtnText}>{updateBtnText}</Text>
+                    <Text style={styles.updateBtnText}>{progress == 1 ? '安装' : updateBtnText}</Text>
                 </View>
             </TouchableOpacity>
         )
