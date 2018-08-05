@@ -9,5 +9,18 @@
 }
 RCT_EXPORT_MODULE()
 
+- (NSDictionary *)constantsToExport
+{
+    return @{@"appVersion"  : [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"],
+             @"buildVersion": [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey],
+             @"bundleIdentifier"  : [[NSBundle mainBundle] bundleIdentifier]
+            };
+
+}
+
++ (BOOL)requiresMainQueueSetup
+{
+    return YES;
+}
 @end
   
