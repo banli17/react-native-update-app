@@ -17,8 +17,6 @@ import {
     ScrollView
 } from "react-native"
 
-console.log(NativeModules)
-
 const {RNUpdateApp} = NativeModules
 const RNFS = require("react-native-fs")
 const {width, height} = Dimensions.get("window")
@@ -197,7 +195,7 @@ class RNUpdate extends Component {
 
         let {url} = this.fetchRes
         // 如果是ios，打开appstore连接
-        Linking.openURL('https://itunes.apple.com/cn/app/%E7%BD%91%E6%98%93%E6%9C%89%E9%81%93%E8%AF%8D%E5%85%B8/id491854842?mt=12').catch(err =>
+        Linking.openURL(url).catch(err =>
             console.error("An error occurred", err)
         )
     }
@@ -226,120 +224,121 @@ class RNUpdate extends Component {
         if (progress > 0 && progress < 1) {
             return (
                 <View style={styles.progressBar}>
-        <View
-            style={{
-                position: 'absolute',
-                    left: 0,
-                    top: 0,
-                    backgroundColor: progressBarColor,
-                    height: 3,
-                    width: progress * updateBoxWidth,
-            }}
-            />
-            <Text style={styles.updateBtnText}>下载中{parseInt(progress * 100, 10)}%</Text>
-            </View>
-        )
+                    <View
+                        style={{
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            backgroundColor: progressBarColor,
+                            height: 3,
+                            width: progress * updateBoxWidth,
+                        }}
+                    />
+                    <Text style={styles.updateBtnText}>下载中{parseInt(progress * 100, 10)}%</Text>
+                </View>
+            )
         }
         return (
             <TouchableOpacity onPress={this.updateApp}>
-    <View style={styles.updateBtn}>
-    <Text style={styles.updateBtnText}>{progress == 1 ? '安装' : updateBtnText}</Text>
-        </View>
-        </TouchableOpacity>
-    )
+                <View style={styles.updateBtn}>
+                    <Text style={styles.updateBtnText}>{progress == 1 ? '安装' : updateBtnText}</Text>
+                </View>
+            </TouchableOpacity>
+        )
     }
 
     renderCloseBtn = () => {
         let {closeImage, updateBoxWidth, updateBoxHeight} = this.props
         return (
             <View
-        style={{
-            position: "absolute",
-                right: (width - updateBoxWidth) / 2 - 16,
-                top: (height - updateBoxHeight) / 2 - 16,
-                zIndex: 1,
-                width: 32,
-                height: 32,
-                backgroundColor: "#e6e6e6",
-                borderRadius: 16
-        }}
-    >
-    <TouchableOpacity
-        onPress={this.hideModal}
-        style={{
-            width: 32,
-                height: 32,
-                alignItems: "center",
-                justifyContent: "center"
-        }}
-    >
-    <Image
-        source={closeImage}
-        style={{width: 20, height: 20}}
-        />
-        </TouchableOpacity>
-        </View>
-    )
+                style={{
+                    position: "absolute",
+                    right: (width - updateBoxWidth) / 2 - 16,
+                    top: (height - updateBoxHeight) / 2 - 16,
+                    zIndex: 1,
+                    width: 32,
+                    height: 32,
+                    backgroundColor: "#e6e6e6",
+                    borderRadius: 16
+                }}
+            >
+                <TouchableOpacity
+                    onPress={this.hideModal}
+                    style={{
+                        width: 32,
+                        height: 32,
+                        alignItems: "center",
+                        justifyContent: "center"
+                    }}
+                >
+                    <Image
+                        source={closeImage}
+                        style={{width: 20, height: 20}}
+                    />
+                </TouchableOpacity>
+            </View>
+        )
     }
 
     renderBanner = () => {
         let {bannerImage, bannerWidth, bannerHeight, bannerResizeMode} = this.props
         return (
             <View style={{height: bannerHeight}}>
-    <Image
-        style={{
-            width: bannerWidth,
-                height: bannerHeight,
-                resizeMode: bannerResizeMode
-        }}
-        source={bannerImage}>
-            </Image>
+                <Image
+                    style={{
+                        width: bannerWidth,
+                        height: bannerHeight,
+                        resizeMode: bannerResizeMode
+                    }}
+                    source={bannerImage}>
+                </Image>
             </View>
-    )
+        )
     }
 
     renderFileSize = () => {
-        if (isIOS) {
+        let {fileSize} = this.state
+        if (!isIOS) {
             return <Text>文件大小：{fileSize}M</Text>
         }
     }
 
     render() {
-        let {modalVisible, progress, desc, fileSize} = this.state
+        let {modalVisible, progress, desc } = this.state
         let {updateBoxWidth, updateBoxHeight} = this.props
         return (
             <Modal
-        animationType={"fade"}
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-        }}
-    >
-    <View style={styles.wrap}>
-        {this.renderCloseBtn()}
-    <View
-        style={[
-                styles.innerBox,
-        {width: updateBoxWidth, height: updateBoxHeight}
-    ]}>
-        {this.renderBanner()}
-    <View style={{width: updateBoxWidth, height: 85}}>
-    <ScrollView style={{paddingLeft: 10, paddingRight: 10}}>
-        {this.renderFileSize()}
-    <Text>升级说明：</Text>
-        {desc &&
-        desc.map((d, i) => {
-            return (
-                <Text key={i}>{i + 1 + ". " + d}</Text>
+                animationType={"fade"}
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                }}
+            >
+                <View style={styles.wrap}>
+                    {this.renderCloseBtn()}
+                    <View
+                        style={[
+                            styles.innerBox,
+                            {width: updateBoxWidth, height: updateBoxHeight}
+                        ]}>
+                        {this.renderBanner()}
+                        <View style={{width: updateBoxWidth, height: 85}}>
+                            <ScrollView style={{paddingLeft: 10, paddingRight: 10}}>
+                                {this.renderFileSize()}
+                                <Text>升级说明：</Text>
+                                {desc &&
+                                desc.map((d, i) => {
+                                    return (
+                                        <Text key={i}>{i + 1 + ". " + d}</Text>
+                                    )
+                                })}
+                            </ScrollView>
+                        </View>
+                        {this.renderBottom()}
+                    </View>
+                </View>
+            </Modal>
         )
-        })}
-    </ScrollView>
-        </View>
-        {this.renderBottom()}
-    </View>
-        </View>
-        </Modal>
-    )
     }
 }
 
