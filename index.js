@@ -62,7 +62,7 @@ class RNUpdate extends Component {
     async componentWillMount() {
         if (this.props.onBeforeStart) {
             let res = await this.props.onBeforeStart()
-            console.log('res')
+            // console.log('res')
             this.checkUpdate(res)
         }
     }
@@ -119,7 +119,7 @@ class RNUpdate extends Component {
                 }
             }
         } catch (e) {
-            console.error('checkUpdate', e)
+            console.warn('checkUpdate', e)
         }
     }
 
@@ -196,7 +196,7 @@ class RNUpdate extends Component {
         let {url} = this.fetchRes
         // 如果是ios，打开appstore连接
         Linking.openURL(url).catch(err =>
-            console.error("An error occurred", err)
+            console.warn("An error occurred", err)
         )
     }
     // stopUpdateApp = () => {
