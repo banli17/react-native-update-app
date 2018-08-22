@@ -2,6 +2,9 @@
 
 全自动 app 硬更新组件，简单易用。
 
+## 例子
+![example](./example/index.js)
+
 ## 预览
 
 <img src="./preview/1.gif" width="320" height="568" />

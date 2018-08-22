@@ -119,7 +119,7 @@ class RNUpdate extends Component {
                 }
             }
         } catch (e) {
-            console.warn('checkUpdate', e)
+            console.warn('react-native-update-app check update error', e)
         }
     }
 
