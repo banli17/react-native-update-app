@@ -1,8 +1,8 @@
 # react-native-update-app
 
-【通知】：本库已经停止更新。现在采用的是同事的库：[react-native-android-update-momo](https://www.npmjs.com/package/react-native-android-update-momo)
+**【通知】：本库已经停止更新。现在采用的是同事的库：[react-native-android-update-momo](https://www.npmjs.com/package/react-native-android-update-momo)**
 
-【react-native-android-update-momo】用法参考：https://github.com/banli17/react-native-update-app/issues/10
+**【react-native-android-update-momo】用法参考：https://github.com/banli17/react-native-update-app/issues/10**
 
 全自动 app 硬更新组件，简单易用。
 
