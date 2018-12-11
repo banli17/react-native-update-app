@@ -1,7 +1,7 @@
 # react-native-update-app
 
 **【通知】：我们现在线上app采用react-native开发，期间遇到了无数的坑。功能应该涉及了app开发的很多方面。
-    我会将它整理到[react-native经验汇总](https://github.com/banli17/w3croad-blog/blob/master/static/react-native/index.md)**
+    我会将它整理到[react-native商业项目经验汇总](https://github.com/banli17/w3croad-blog#react-native%E5%95%86%E4%B8%9A%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C%E9%9B%86)**
 
 **【通知】：本库已经停止更新。现在采用的是同事的库：[react-native-android-update-momo](https://www.npmjs.com/package/react-native-android-update-momo)**
 
